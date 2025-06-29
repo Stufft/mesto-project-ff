@@ -1,4 +1,4 @@
-import { cardTemplate } from "../index.js";
+const cardTemplate = document.querySelector("#card-template").content;
 
 export function handleLike(evt) {
   evt.target.classList.toggle("card__like-button_is-active");

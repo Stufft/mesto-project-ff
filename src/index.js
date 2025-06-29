@@ -19,7 +19,6 @@ const placeNameInput = formNewPlace.elements["place-name"];
 const linkInput = formNewPlace.elements.link;
 const popupImage = popupTypeImage.querySelector(".popup__image");
 const popupCaptionImage = popupTypeImage.querySelector(".popup__caption");
-export const cardTemplate = document.querySelector("#card-template").content;
 
 function handleImageClick(cardData) {
   popupImage.src = cardData.link;
