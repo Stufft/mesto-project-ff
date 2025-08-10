@@ -1,5 +1,5 @@
 import "./pages/index.css";
-import { openModal, closeModal, modalListeners } from "./components/modal.js";
+import { openModal, closeModal, setupListeners } from "./components/modal.js";
 import { createCard, handleLike, handleDelete } from "./components/card.js";
 import {
   isValid,
@@ -27,6 +27,8 @@ const profileAvatarButton = document.querySelector(
 const popupTypeAvatar = document.querySelector(".popup_type_edit-avatar");
 const popupTypeNewCard = document.querySelector(".popup_type_new-card");
 const popupTypeImage = document.querySelector(".popup_type_image");
+const imageElement = popupTypeImage.querySelector(".popup__image");
+const captionElement = popupTypeImage.querySelector(".popup__caption");
 const profileTitle = document.querySelector(".profile__title");
 const profileDescription = document.querySelector(".profile__description");
 const profileImage = document.querySelector(".profile__image");
@@ -41,10 +43,22 @@ const linkInputAvatar = formAvatar.elements["avatar-link"];
 
 let userId;
 
-function handleImageClick(link, name) {
-  const imageElement = popupTypeImage.querySelector(".popup__image");
-  const captionElement = popupTypeImage.querySelector(".popup__caption");
+function renderLoading(
+  isLoading,
+  button,
+  buttonText = "Сохранить",
+  loadingText = "Сохранение..."
+) {
+  if (isLoading) {
+    button.textContent = loadingText;
+    button.disabled = true;
+  } else {
+    button.textContent = buttonText;
+    button.disabled = false;
+  }
+}
 
+function handleImageClick(link, name) {
   imageElement.src = link;
   imageElement.alt = name;
   captionElement.textContent = name;
@@ -54,6 +68,8 @@ function handleImageClick(link, name) {
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
+  const submitButton = formEditProfile.querySelector(".popup__button");
+  renderLoading(true, submitButton);
   const name = nameInput.value;
   const about = jobInput.value;
   profileEditData(name, about)
@@ -64,11 +80,16 @@ function handleProfileFormSubmit(evt) {
     })
     .catch((err) => {
       console.error(err);
+    })
+    .finally(() => {
+      renderLoading(false, submitButton);
     });
 }
 
 function handleAddCardFormSubmit(evt) {
   evt.preventDefault();
+  const submitButton = formNewPlace.querySelector(".popup__button");
+  renderLoading(true, submitButton);
   const name = placeNameInput.value;
   const link = linkInput.value;
   addNewCard(name, link)
@@ -85,11 +106,16 @@ function handleAddCardFormSubmit(evt) {
     })
     .catch((err) => {
       console.error(err);
+    })
+    .finally(() => {
+      renderLoading(false, submitButton);
     });
 }
 
 function handleEditAvatarSubmit(evt) {
   evt.preventDefault();
+  const submitButton = formAvatar.querySelector(".popup__button");
+  renderLoading(true, submitButton);
   const link = linkInputAvatar.value;
   avatarEdit(link)
     .then((res) => {
@@ -98,6 +124,9 @@ function handleEditAvatarSubmit(evt) {
     })
     .catch((err) => {
       console.error(err);
+    })
+    .finally(() => {
+      renderLoading(false, submitButton);
     });
 }
 
@@ -140,8 +169,7 @@ Promise.all([getUserData(), getCards()])
         handleDelete,
         userId
       );
-      const likesCounter = cardElement.querySelector(".card__like-counter");
-      likesCounter.textContent = cardData.likes.length;
+
       placesList.append(cardElement);
     });
   })
@@ -158,5 +186,5 @@ const validationSettings = {
   errorClass: "popup__error_visible",
 };
 
-modalListeners();
+setupListeners();
 enableValidation(validationSettings);

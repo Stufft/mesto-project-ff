@@ -17,7 +17,7 @@ export function closeModal(popup) {
   document.removeEventListener("keydown", handleEscapeClose);
 }
 
-export function modalListeners() {
+export function setupListeners() {
   const popups = document.querySelectorAll(".popup");
 
   popups.forEach((popup) => {
