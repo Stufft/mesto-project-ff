@@ -29,7 +29,8 @@ export function createCard(
   cardData,
   handleImageClick,
   handleLike,
-  handleDelete
+  handleDelete,
+  userId
 ) {
   const cardElement = cardTemplate
     .querySelector(".places__item")
@@ -46,15 +47,20 @@ export function createCard(
 
   likeCounter.textContent = cardData.likes.length;
 
-  deleteButton.addEventListener("click", () =>
-    handleDelete(cardData._id, cardElement)
-  );
+  if (cardData.owner._id !== userId) {
+    deleteButton.remove();
+  } else {
+    deleteButton.addEventListener("click", () =>
+      handleDelete(cardData._id, cardElement)
+    );
+  }
 
   likeButton.addEventListener("click", () =>
     handleLike(cardData._id, likeButton, likeCounter)
   );
 
-  cardImage.addEventListener("click", () => handleImageClick(cardData));
-
+  cardImage.addEventListener("click", () =>
+    handleImageClick(cardData.link, cardData.name)
+  );
   return cardElement;
 }

@@ -16,6 +16,17 @@ function handleError(err) {
   return Promise.reject(err);
 }
 
+export function getUserData() {
+  return fetch(`${baseUrl}/users/me`, {
+    method: "GET",
+    headers: {
+      authorization: token,
+    },
+  })
+    .then(checkResponse)
+    .catch(handleError);
+}
+
 export function getCards() {
   return fetch(`${baseUrl}/cards`, {
     method: "GET",
@@ -92,15 +103,15 @@ export function unlikeCard(cardId) {
     .catch(handleError);
 }
 
-export function avatarEdit(newAvatarUrl) {
+export function avatarEdit(link) {
   return fetch(`${baseUrl}/users/me/avatar`, {
     method: "PATCH",
     headers: {
       authorization: token,
-      "Content-type": "application/json",
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      avatar: newAvatarUrl,
+      avatar: link,
     }),
   })
     .then(checkResponse)

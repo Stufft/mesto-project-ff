@@ -8,6 +8,7 @@ import {
 } from "./components/validation.js";
 import {
   getCards,
+  getUserData,
   profileEditData,
   addNewCard,
   deleteCard,
@@ -37,79 +38,66 @@ const formAvatar = document.forms["avatar-edit"];
 const placeNameInput = formNewPlace.elements["place-name"];
 const linkInput = formNewPlace.elements.link;
 const linkInputAvatar = formAvatar.elements["avatar-link"];
-const popupImage = popupTypeImage.querySelector(".popup__image");
-const popupCaptionImage = popupTypeImage.querySelector(".popup__caption");
 
-function handleImageClick(cardData) {
-  popupImage.src = cardData.link;
-  popupImage.alt = cardData.name;
-  popupCaptionImage.textContent = cardData.name;
+let userId;
+
+function handleImageClick(link, name) {
+  const imageElement = popupTypeImage.querySelector(".popup__image");
+  const captionElement = popupTypeImage.querySelector(".popup__caption");
+
+  imageElement.src = link;
+  imageElement.alt = name;
+  captionElement.textContent = name;
+
   openModal(popupTypeImage);
 }
 
 function handleProfileFormSubmit(evt) {
   evt.preventDefault();
-  const submitButton = formEditProfile.querySelector(".popup__button");
-  const originalButtonText = submitButton.textContent;
-  submitButton.textContent = "Сохранение...";
-
-  profileEditData(nameInput.value, jobInput.value)
-    .then((updatedUser) => {
-      profileTitle.textContent = updatedUser.name;
-      profileDescription.textContent = updatedUser.about;
+  const name = nameInput.value;
+  const about = jobInput.value;
+  profileEditData(name, about)
+    .then((res) => {
+      profileTitle.textContent = res.name;
+      profileDescription.textContent = res.about;
       closeModal(popupTypeEdit);
     })
     .catch((err) => {
       console.error(err);
-    })
-    .finally(() => {
-      submitButton.textContent = originalButtonText;
     });
 }
 
 function handleAddCardFormSubmit(evt) {
   evt.preventDefault();
-  const submitButton = formNewPlace.querySelector(".popup__button");
-  const originalButtonText = submitButton.textContent;
-  submitButton.textContent = "Сохранение...";
-
-  addNewCard(placeNameInput.value, linkInput.value)
+  const name = placeNameInput.value;
+  const link = linkInput.value;
+  addNewCard(name, link)
     .then((cardData) => {
       const cardElement = createCard(
         cardData,
         handleImageClick,
         handleLike,
-        handleDelete
+        handleDelete,
+        userId
       );
-      const likesCounter = cardElement.querySelector(".card__like-counter");
-      likesCounter.textContent = cardData.likes.length;
       placesList.prepend(cardElement);
       closeModal(popupTypeNewCard);
     })
     .catch((err) => {
       console.error(err);
-    })
-    .finally(() => {
-      submitButton.textContent = originalButtonText;
     });
 }
 
 function handleEditAvatarSubmit(evt) {
   evt.preventDefault();
-  const submitButton = formAvatar.querySelector(".popup__button");
-  const originalButtonText = submitButton.textContent;
-  submitButton.textContent = "Сохранение...";
-
-  avatarEdit(linkInputAvatar.value)
-    .then((updatedUser) => {
-      profileImage.style.backgroundImage = `url(${updatedUser.avatar})`;
+  const link = linkInputAvatar.value;
+  avatarEdit(link)
+    .then((res) => {
+      profileImage.style.backgroundImage = `url(${res.avatar})`;
       closeModal(popupTypeAvatar);
     })
     .catch((err) => {
       console.error(err);
-    })
-    .finally(() => {
-      submitButton.textContent = originalButtonText;
     });
 }
 
@@ -136,14 +124,21 @@ profileAvatarButton.addEventListener("click", () => {
   openModal(popupTypeAvatar);
 });
 
-getCards()
-  .then((cards) => {
-    cards.forEach((cardData) => {
+Promise.all([getUserData(), getCards()])
+  .then(([userData, cardsData]) => {
+    userId = userData._id;
+
+    profileTitle.textContent = userData.name;
+    profileDescription.textContent = userData.about;
+    profileImage.style.backgroundImage = `url(${userData.avatar})`;
+
+    cardsData.forEach((cardData) => {
       const cardElement = createCard(
         cardData,
         handleImageClick,
         handleLike,
-        handleDelete
+        handleDelete,
+        userId
       );
       const likesCounter = cardElement.querySelector(".card__like-counter");
       likesCounter.textContent = cardData.likes.length;
@@ -151,7 +146,7 @@ getCards()
     });
   })
   .catch((err) => {
-    console.error("Ошибка при загрузке карточек:", err);
+    console.error("Ошибка при загрузке данных:", err);
   });
 
 const validationSettings = {
@@ -163,6 +158,5 @@ const validationSettings = {
   errorClass: "popup__error_visible",
 };
 
-enableValidation(validationSettings);
-
 modalListeners();
+enableValidation(validationSettings);
