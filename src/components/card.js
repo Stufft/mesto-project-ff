@@ -1,11 +1,28 @@
+import { deleteCard, likeCard, unlikeCard } from "./api.js";
 const cardTemplate = document.querySelector("#card-template").content;
 
-export function handleLike(evt) {
-  evt.target.classList.toggle("card__like-button_is-active");
+export function handleLike(cardId, likeButton, likeCounter) {
+  const isLiked = likeButton.classList.contains("card__like-button_is-active");
+  const promise = isLiked ? unlikeCard(cardId) : likeCard(cardId);
+
+  promise
+    .then((res) => {
+      likeCounter.textContent = res.likes.length;
+      likeButton.classList.toggle("card__like-button_is-active");
+    })
+    .catch((err) => {
+      console.error("Ошибка при работе с лайками:", err);
+    });
 }
 
-export function handleDelete(evt) {
-  evt.target.closest(".card").remove();
+export function handleDelete(cardId, cardElement) {
+  deleteCard(cardId)
+    .then(() => {
+      cardElement.remove();
+    })
+    .catch((err) => {
+      console.error("Ошибка при удалении карточки:", err);
+    });
 }
 
 export function createCard(
@@ -21,15 +38,23 @@ export function createCard(
   const cardTitle = cardElement.querySelector(".card__title");
   const deleteButton = cardElement.querySelector(".card__delete-button");
   const likeButton = cardElement.querySelector(".card__like-button");
+  const likeCounter = cardElement.querySelector(".card__like-counter");
 
   cardTitle.textContent = cardData.name;
   cardImage.src = cardData.link;
   cardImage.alt = cardData.name;
-  deleteButton.addEventListener("click", handleDelete);
 
-  likeButton.addEventListener("click", handleLike);
-  cardImage.addEventListener("click", () => {
-    handleImageClick(cardData);
-  });
+  likeCounter.textContent = cardData.likes.length;
+
+  deleteButton.addEventListener("click", () =>
+    handleDelete(cardData._id, cardElement)
+  );
+
+  likeButton.addEventListener("click", () =>
+    handleLike(cardData._id, likeButton, likeCounter)
+  );
+
+  cardImage.addEventListener("click", () => handleImageClick(cardData));
+
   return cardElement;
 }

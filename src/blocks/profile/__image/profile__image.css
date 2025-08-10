@@ -20,3 +20,39 @@
     margin-right: 0;
   }
 }
+
+.profile__edit-avatar-button {
+  position: relative;
+  border: none;
+  background-color: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+.profile__edit-avatar-button::before,
+.profile__edit-avatar-button::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -25px;
+  right: 0;
+  bottom: 0;
+  transition: opacity 0.3s ease;
+  opacity: 0;
+}
+
+.profile__edit-avatar-button::before {
+  background-color: rgba(0, 0, 0, 0.8);
+}
+
+.profile__edit-avatar-button::after {
+  background-image: url('data:image/svg+xml;charset=utf-8,%3Csvg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg"%3E%3Cpath d="M26 3.45351L6.76981 22.7932L3.33585 19.2903L22.517 0L26 3.45351ZM0 26L5.10189 24.4706L1.52075 21.0171L0 26Z" fill="white"/%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+
+  background-position: center;
+  background-size: 26px;
+}
+
+.profile__edit-avatar-button:hover::before,
+.profile__edit-avatar-button:hover::after {
+  opacity: 1;
+}
